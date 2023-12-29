@@ -6,10 +6,10 @@ const fs = require('fs/promises');
     try {
       // we want to check wether we have that file already
       const existingFileHandler = await fs.open(filePath, 'r');
-      existingFileHandler.close();
 
       // we already have the file
-      return console.log(`the filepath ${filePath}  already exists`);
+      console.log(`the filepath ${filePath}  already exists`);
+      existingFileHandler.close();
     } catch (error) {
       // we don't have the file, so we should create it
       // 'w' is for write operation
@@ -25,14 +25,53 @@ const fs = require('fs/promises');
       const existingFileHandler = await fs.open(filePath, 'r');
       existingFileHandler.close();
 
+      // we have the file, so we should delete it
       const deletedFileHandler = await unlink(filePath);
-      deletedFileHandler.close();
 
-      console.log(`the file ${filePath} has been successfully deleted`);
+      return console.log(`the file ${filePath} has been successfully deleted`);
+
+      deletedFileHandler.close();
     } catch (error) {
       console.log(`the filepath ${filePath}  does not exist!`);
     }
   };
+
+  const renameFile = async (filePath, newFilePath) => {
+    try {
+      // we want to check wether the file exists
+      const existingFileHandler = await fs.open(filePath, 'r');
+      existingFileHandler.close();
+
+      // we have the file, so we should rename it
+      const renamedFileHandler = await fs.rename(filePath, newFilePath);
+
+      console.log(
+        `the file ${filePath} has been successfully renamed to ${newFilePath}`
+      );
+
+      renamedFileHandler.close();
+    } catch (error) {
+      console.log(`the filepath ${filePath}  does not exist!`);
+    }
+  };
+
+  const addToFile = async (filePath, content) => {
+    try {
+      // we can append to the filepath, but if it doesn't exist, it will create it
+      const addedContentToFileHandler = await fs.appendFile(filePath, content);
+
+      console.log(
+        `the content: "${content}" has been successfully added to the file ${filePath}`
+      );
+
+      addedContentToFileHandler.close();
+    } catch (error) {
+      console.log(
+        `couldn't add the content: "${content}" to the file ${filePath}!`
+      );
+    }
+  };
+
   //commands
   const CREATE_FILE = 'create a file';
   const DELETE_FILE = 'delete a file';
@@ -82,6 +121,27 @@ const fs = require('fs/promises');
     if (command.includes(DELETE_FILE)) {
       const filePath = command.substring(DELETE_FILE.length + 1);
       deleteFile(filePath);
+    }
+
+    //rename a file
+    // rename a file <path> <new path>
+    if (command.includes(RENAME_FILE)) {
+      const filePaths = command.substring(RENAME_FILE.length + 1);
+      const filePath = filePaths.split(' ')[0];
+      const newFilePath = filePaths.split(' ')[1];
+
+      renameFile(filePath, newFilePath);
+    }
+
+    //add to a file
+    // add to a file <path> <content>
+    if (command.includes(ADD_TO_FILE)) {
+      const filePathContent = command.substring(RENAME_FILE.length + 1);
+
+      const filePath = filePathContent.split(' ')[0];
+      const content = filePathContent.substring(filePath.length + 1) + ' ';
+
+      addToFile(filePath, content);
     }
   });
 

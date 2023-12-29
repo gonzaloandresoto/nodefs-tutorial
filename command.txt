@@ -1,1 +1,1 @@
-delete a file text.txt
+add to a file text.txt okay time for seconds
